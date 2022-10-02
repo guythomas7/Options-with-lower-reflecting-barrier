@@ -7,7 +7,7 @@
 #   let me know at R.G.ThomasNOSPAM AT kent.ac.uk
 #=====================#
 
-#This code 
+#This code:
 #(1) evaluates call and put prices analytically, and by Monte Carlo simulation 
 #(2) demonstrates #that replication of a written put in the presence of the barrier always works, using EITHER the 
 #Black-Scholes delta, OR the barrier formula delta (the latter is preferred because it is cheaper).
@@ -33,7 +33,7 @@ nSim <- 1000 #number of simulations (paths)
 stopifnot(b <= min(S,K), r!=q, K!=b)
 
 #analytic prices
-# z's as in the paper
+# z's as in the papers
 z1 <- (log(S/K) + (r - q + 0.5*sigma^2)*tau)/(sigma*sqrt(tau))
 z2 <- (log(b^2/(K*S)) + (r - q + 0.5*sigma^2)*tau)/(sigma*sqrt(tau))
 z3 <- (log(S/b) + (r - q + 0.5*sigma^2)*tau)/(sigma*sqrt(tau))
@@ -111,17 +111,6 @@ BS_delta_written_put[,1] <- -exp(-q*tau)*(pnorm(z1)-1) #positive number
 BS_stock_position_after_trade[,1] <- BS_delta_written_put[1] 
 BS_cash_account[,1] <-  -S * BS_delta_written_put[1] - BS_put 
 BS_trade_size[,1] <- 0
-  
-#Notes:
-# BS_delta_written_put[1] is positive number, we're buying the asset to synthesise a written put.
-# BS_cash_acount[1] is negative number, borrowing  to buy the asset. Also borrowing a bit more, 
-# because a written put involves owning the asset at maturity,but with a loss from the higher strike.
-  
-# Perhaps best understood by considering replication of BOUGHT put, For this, take position S * Delta_Put 
-# in the asset (a negative number, i.e. a short). You invest V_Put - S * Delta_Put in the bond, where 
-# Delta_Put is a negative number, so the investment is greater than V_Put. This enables you to replicate 
-# payoffs of a bought put. So wouldn't pay more than V_BS_Put for a bought put, because if you had that 
-# amount of cash, you could replicate put payoffs. For WRITTEN put, flip the sign on both trades.
   
 #Thomas put replication
 
@@ -203,7 +192,7 @@ Final_forward_hedge_position <- Forward_hedge_position[,j]
 Final_forward_profit <- Y_T - Final_forward_hedge_position # alwqays zero!
 Forward_hedging_error <- Final_forward_profit #always zero!
   
-# Then for BS replication
+#Then for BS replication
   
 BS_final_cash <- BS_cash_account[,j] 
 BS_final_stock <- BS_stock_position_after_trade[,j] 
@@ -227,9 +216,9 @@ Monte_Carlo_put_price <- exp(-r*(tau))*expected_payoff_put
 
 Mean_forward_hedging_error <- mean(Forward_hedging_error) 
 # Forward hedging error is always zero - I include this only to show that the usual forward hedging recipe works
-#   perfectly. (People often think the barrier will change the forward price. Of course if you introduce a barrier
-#   where there was none before, that will raise both spot and forward **in Â£ numeraire**; but the spot-to-forward
-#   arbitrage is unaffected.
+#   perfectly. (People often think the barrier will change the forward price. If you introduce a barrier
+#   where there was none before, that will raise both spot and forward **in £ numeraire**; but the spot-to-forward
+#   arbitrage is unaffected.)
 
 #Then means for BS 
 Mean_BS_final_cash <-mean(BS_final_cash)
