@@ -2,7 +2,7 @@
 # DISCLAIMER
 # This  code is provided "as is" and "with all faults" for educational and research use only.  
 #   The author makes no representations or warranties of any kind concerning its correctness or 
-#   suitability for any particular purposes.  Some numbers and graphs in published papers were
+#   suitability for any particular purpose.  Some numbers and graphs in published papers were
 #   produced in Excel, not this code. If you find errors or ways to improve the code, please 
 #   let me know at R.G.ThomasNOSPAM AT kent.ac.uk
 #=====================#
@@ -12,7 +12,7 @@
 #(2) demonstrates #that replication of a written put in the presence of the barrier always works, using EITHER the 
 #Black-Scholes delta, OR the barrier formula delta (the latter is preferred because it is cheaper).
 
-#This code is vectorised (i.e. all nSim simulations are performed in a single matrix, with no loop), 
+#This code is vectorised (i.e. all nSim asset paths are simulated in a single matrix, with no loop), 
 #and so runs over 50x faster than earlier unvectorised code. 
 
 # Setting parameters 
@@ -22,11 +22,11 @@ b <- 0.5 #barrier - for b = K case, set b just slightly less than K, to avoid di
 tau <- 25 #time to maturity T - t (in years) 
 r <- 0.015 #risk-free annual interest rate (convenient to set to zero)
 q <- 0.01 #deferment rate (yield) (needs slightly different from r, to avoid division-by-zero problems in theta)
-sigma <- 0.13 #annual volatility of the stock price (standard deviation)
+sigma <- 0.13 #annual volatility of the notional GBM price (standard deviation)
 
 set.seed(1930) #set the seed (if not set, it's taken from the computer clock)
 N <- 6300 #N is number of time steps, e.g. 252 x 25 = 6300 steps for every working day over 25 years. 
-nSim <- 1000 #number of simulations (paths) 
+nSim <- 100 #number of simulations (paths) 
 
 
 #Check validity of inputs
@@ -95,12 +95,12 @@ Forward_hedge_delta <- 1
 Forward_hedge_position <- matrix(numeric(nSim*N), nrow = nSim, ncol = N)
   
 #Black-Scholes replication of barrier put  
-  # NB In this program we are using Black-Scholes to hedge the BARRIER put - NOT the ordinary 
-  #  Black-Scholes put. This always works, because Black-Scholes works for ANY random GBM path, 
+  # NB In this program we are using Black-Scholes to hedge the put with reflecting barrier - NOT the ordinary 
+  #  put without a reflecting barrier. This always works, for the reasons in Appendix B of the paper.
+  # Another heuristic way of thinking about it: Black-Scholes replicates the put payoff for ANY random GBM path, 
   #  including one which happens to always turn upwards at say 0.5 (but without a barrier in place 
   #  at 0.5). The RGBM path (ie with an actual barrier at 0.5) is observationally indistinguishable 
-  #  from this. So Black-Scholes replication always works for the barrier put. (But it's unnecessarily 
-  #  expensive; my replication scheme is cheaper.) 
+  #  from this. 
 BS_delta_written_put <- matrix(numeric(nSim*N), nrow = nSim, ncol = N)
 BS_stock_position_before_trade <- matrix(numeric(nSim*N), nrow = nSim, ncol = N)
 BS_stock_position_after_trade <- matrix(numeric(nSim*N), nrow = nSim, ncol = N)
@@ -127,10 +127,11 @@ Thomas_z4 <- matrix(numeric(nSim*N), nrow = nSim, ncol = N)
 Thomas_delta_written_put[,1] <- -exp(-q*tau)*(pnorm(z1) - pnorm(z3) + (b/S)^(1+theta)*(pnorm(z4)-pnorm(z2)))
 #using z1,...,z4 from top of program...OK at time 1.
 Thomas_stock_position_after_trade[,1] <- Thomas_delta_written_put[,1] # same as above
-Thomas_cash_account[,1] <- -S * Thomas_delta_written_put[,1] - Analytic_barrier_put #negative number, borrowing to buy the asset. 
+Thomas_cash_account[,1] <- -S * Thomas_delta_written_put[,1] - Analytic_barrier_put 
+#negative number, borrowing to buy the asset. 
 Thomas_trade_size[,1] <- 0
   
-# Then do the loop with hedging at every step. This is slow, but given the recursive nature of the 
+# Then do the loop of N time steps, with hedging at every step. This is slow, but given the recursive nature of the 
 # definition of Y_t and the need to hedge at every step, I can't see how to speed it up.
  
 for(j in 2:N){
@@ -149,14 +150,17 @@ for(j in 2:N){
     
    #Then for BS replication
     
-    BS_delta_written_put[,j] <- -exp(-q*tau*(1-j/N))*(pnorm((log(Y[,j]/K) +(r- q +0.5*sigma^2)*(tau*(1-j/N)))/(sigma*sqrt(tau*(1-j/N))))-1)
+    BS_delta_written_put[,j] <- -exp(-q*tau*(1-j/N))*(pnorm((log(Y[,j]/K) +(r- q +
+                                 0.5*sigma^2)*(tau*(1-j/N)))/(sigma*sqrt(tau*(1-j/N))))-1)
     
     
-    BS_trade_size[,j] <- BS_delta_written_put[,j] - BS_delta_written_put[,j-1] #if delta as gone down, need to sell some  
+    BS_trade_size[,j] <- BS_delta_written_put[,j] - BS_delta_written_put[,j-1] 
+    #if delta has gone down, need to sell some  
     BS_stock_position_after_trade[,j] <- BS_stock_position_after_trade[,j-1] + BS_trade_size[,j] 
     # trade restores position to fractional size delta, based on new asset price    
     #E.g. Selling some if price has gone up, which implies delta of a written put has fallen
-    BS_cash_account[,j] <- BS_cash_account[,j-1] * exp(r*dt) + BS_stock_position_after_trade[,j-1] *Y[,j] * q *dt - BS_trade_size[,j] * Y[,j] 
+    BS_cash_account[,j] <- BS_cash_account[,j-1] * exp(r*dt) + BS_stock_position_after_trade[,j-1] *Y[,j] * q *dt - 
+                           BS_trade_size[,j] * Y[,j] 
     
     #Then for Thomas replication
     
@@ -168,7 +172,7 @@ for(j in 2:N){
     
     if (j!=N) {
       Thomas_delta_written_put[,j] <- -exp(-q*tau*(1-j/N))*(pnorm(Thomas_z1[,j]) - pnorm(Thomas_z3[,j]) +
-                                                             (b/Y[,j])^(1+theta) * (pnorm(Thomas_z4[,j]) - pnorm(Thomas_z2[,j])))
+                                       (b/Y[,j])^(1+theta) * (pnorm(Thomas_z4[,j]) - pnorm(Thomas_z2[,j])))
     } else {
       Thomas_delta_written_put[,j] <- ifelse(K > Y[,j], 1, 0)
     }
@@ -216,7 +220,7 @@ Monte_Carlo_put_price <- exp(-r*(tau))*expected_payoff_put
 
 Mean_forward_hedging_error <- mean(Forward_hedging_error) 
 # Forward hedging error is always zero - I include this only to show that the usual forward hedging recipe works
-#   perfectly. (People often think the barrier will change the forward price. If you introduce a barrier
+#   perfectly. (People often think the barrier will change the forward price. But think: if you introduce a barrier
 #   where there was none before, that will raise both spot and forward **in £ numeraire**; but the spot-to-forward
 #   arbitrage is unaffected.)
 
@@ -242,13 +246,17 @@ hist(Thomas_hedging_error)
 
 cat("Analytic B-Scholes Call :",round(BS_call, digits=5), "   Analytic B-Scholes Put :",round(BS_put, digits=5))
 
-cat("\nAnalytic Barrier Call   :",round(Analytic_barrier_call, digits=5), "   Analytic Barrier Put   :",round(Analytic_barrier_put, digits=5))
+cat("\nAnalytic Barrier Call   :",round(Analytic_barrier_call, digits=5),
+    "   Analytic Barrier Put   :",round(Analytic_barrier_put, digits=5))
 
-cat("\nMonte-Carlo Barrier Call:",round(Monte_Carlo_call_price, digits=5), " Monte-Carlo Barrier Put   :",round(Monte_Carlo_put_price, digits=5))
+cat("\nMonte-Carlo Barrier Call:",round(Monte_Carlo_call_price, digits=5), 
+    " Monte-Carlo Barrier Put   :",round(Monte_Carlo_put_price, digits=5))
 
-cat("\n    MC/Analytic for Call:",round(Ratio_Call, digits=5), "        MC/Analytic for Put:",round(Ratio_Put, digits=5))
+cat("\n    MC/Analytic for Call:",round(Ratio_Call, digits=5), 
+    "        MC/Analytic for Put:",round(Ratio_Put, digits=5))
 
-cat("\nMean B-S abs replication error (written put with barrier):",round(Mean_BS_hedging_error,digits=5),  "Thomas ditto: ",round(Thomas_mean_hedging_error,digits=5))
+cat("\nMean B-S abs replication error (written put with barrier):",round(Mean_BS_hedging_error,digits=5),
+    "Thomas ditto: ",round(Thomas_mean_hedging_error,digits=5))
 
 #=====================#
 
