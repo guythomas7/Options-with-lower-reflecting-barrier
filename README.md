@@ -26,4 +26,4 @@ To reproduce Figure 6 in the paper, I set RunNo = 3, after running (2.) with the
 S = K = 1, b = 0.5, tau = 25, r = 0.015, q = 0.1,  sigma = 0.13, c = -0.0001, h =1, 
 set.seed = 1930, N = 50,400, nSim = 10.
 
-I'm using R 3.02 and 64-bit Windows 10. I'm not sure if the same seed will give the same result with different R version or operating system.
+I'm using R 3.02 and 64-bit Windows 10. I'm not sure if the same seed will give the same result with different R versions or operating systems (or hardware).
