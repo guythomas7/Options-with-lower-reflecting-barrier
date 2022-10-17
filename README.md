@@ -21,8 +21,9 @@ You can then use the graph-drawing file at (3.) below to produce the graphs for 
 
 Set RunNo = the run number from (2.) above that you want to graph.
 
-To reproduce Figure 6 in the paper, set RunNo = 3, after running (2.) with these parameters:
+To reproduce Figure 6 in the paper, I set RunNo = 3, after running (2.) with these parameters:
 
 S = K = 1, b = 0.5, tau = 25, r = 0.015, q = 0.1,  sigma = 0.13, c = -0.0001, h =1, 
-seed = 1930, N = 50,400, nSim = 10.
+set.seed = 1930, N = 50,400, nSim = 10.
 
+I'm using R 3.02 and 64-bit Windows 10. I'm not sure if the same seed will give the same result with different R version or operating system.
