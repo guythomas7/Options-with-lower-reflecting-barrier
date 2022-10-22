@@ -7,7 +7,7 @@ This code does the following:
 (b) demonstrates that replication of a written put in the presence of the barrier always works, using EITHER the 
 Black-Scholes delta, OR the barrier formula delta (the latter is preferred because it is cheaper).
 
-This code is vectorised (i.e. all nSim simulations are performed in a single matrix, with no loop), and so runs over 50x faster than earlier unvectorised code.
+This code is vectorised (i.e. all nSim simulations are performed in a single matrix, with no loop), and so runs over 50x faster than earlier unvectorised code. The matrix contains nSim rows (simulation paths) x N columns (time steps).
 
 
 2. Direct_and_synthetic_replication_forwards_puts_calls.R
