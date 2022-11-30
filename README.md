@@ -1,6 +1,6 @@
 1. Option_prices_and_demo_of_replication.R
 
-This code does the following:
+This is the main code, and most likely to be useful for other people's initial experimentation. The code does the following:
 
 (a) simulates the discounted payoffs of calls and puts in the presence of a lower reflecting barrier, and shows that     these converge to the analytical formulas in the paper 
 
@@ -14,7 +14,7 @@ This code is vectorised (i.e. all nSim simulations are performed in a single mat
 
 This code simulates replication paths as in Figure 6 in the paper. 
 
-You can then use the graph-drawing file at (3.) below to produce the graphs for a single asset path.
+You can then use the graph-drawing file at (3.) below to produce the call, put and forward paths for a single underlying asset path.
 
 
 3. Draw_replication_portfolios_paths.R
