@@ -2,10 +2,9 @@
 
 This is the main code, and most likely to be useful for other people's initial experimentation. The code does the following:
 
-(a) simulates the discounted payoffs of calls and puts in the presence of a lower reflecting barrier, and shows that     these converge to the analytical formulas in the paper 
+(a) simulates the payoffs of calls and puts (discounted at the risk-free rate) in the presence of a lower reflecting barrier, and shows that these converge to the analytical formulas in the paper 
 
-(b) demonstrates that replication of a written put in the presence of the barrier always works, using EITHER the 
-Black-Scholes delta, OR the barrier formula delta (the latter is preferred because it is cheaper).
+(b) demonstrates that replication of a written put in the presence of the barrier always works, using EITHER barrier formula delta (preferred because it is cheaper), OR the Black-Scholes delta (as per Appendix B of the paper).
 
 This code is vectorised (i.e. all nSim simulations are performed in a single matrix, with no loop), and so runs over 50x faster than earlier unvectorised code. The matrix contains nSim rows (simulation paths) x N columns (time steps).
 
@@ -26,4 +25,4 @@ To reproduce Figure 6 in the paper, I set RunNo = 3, after running (2.) with the
 S = K = 1, b = 0.5, tau = 25, r = 0.015, q = 0.1,  sigma = 0.13, c = -0.0001, h =1, 
 set.seed = 1930, N = 50,400, nSim = 10.
 
-I'm using R 3.02 and 64-bit Windows 10. I'm not sure if the same seed will give the same result with different R versions or operating systems (or hardware).
+I'm using R 3.02 and 64-bit Windows 10. I'm not sure if the same seed will give the same result with different versions or hardware. 
